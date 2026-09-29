@@ -1,0 +1,9 @@
+training/data/
+training/runs/
+__pycache__/
+*.pyc
+node_modules/
+tests/node_modules/
+tests/out/
+.DS_Store
+training/runs_*.log

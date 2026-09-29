@@ -1,0 +1,20 @@
+import { chromium } from 'playwright';
+import { serve } from './server.mjs';
+const server = await serve(0);
+const base = `http://127.0.0.1:${server.address().port}/`;
+const browser = await chromium.launch();
+const page = await browser.newPage();
+page.on('console', (m) => console.log('[console]', m.type(), m.text()));
+page.on('pageerror', (e) => console.log('[pageerror]', e.message));
+const t0 = Date.now();
+await page.goto(base);
+await page.evaluate(() => window.__psl.ready.then(() => true));
+console.log('ready in', Date.now() - t0, 'ms');
+const r = await page.evaluate(async () => {
+  const b = await (await fetch('/scut/AF1.png')).blob();
+  const t = performance.now();
+  const res = await window.__psl.scorer.process(b);
+  return { ms: performance.now() - t, raw: res.raw, status: res.status, flags: res.flags, metrics: res.metrics };
+});
+console.log(JSON.stringify(r));
+await browser.close(); server.close();

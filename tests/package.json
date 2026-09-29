@@ -1,0 +1,11 @@
+{
+  "name": "psl-scorer-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.0"
+  }
+}

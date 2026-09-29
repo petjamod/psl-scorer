@@ -1,0 +1,34 @@
+{
+  "model": {
+    "id": "hciilab-resnet18-256crop-v1",
+    "file": "models/scut_resnet18.onnx",
+    "bytes": 44698603,
+    "preprocess": "256crop",
+    "test_pearson": 0.910
+  },
+  "conversions": {
+    "note": "z = (raw - mean) / std, using the TRAIN label mean and std of the selected gender from stats.json",
+    "psl": { "base": 4, "per_z": 1.0, "min": 1, "max": 8, "decimals": 1 },
+    "ten": { "base": 5, "per_z": 1.5, "min": 1, "max": 10, "decimals": 1 },
+    "raw_decimals": 2
+  },
+  "quality": {
+    "max_pose_deg": 15,
+    "smile_threshold": 0.5,
+    "jaw_open_threshold": 0.5,
+    "min_eye_distance_px": 60,
+    "min_sharpness": 30,
+    "min_brightness": 70,
+    "max_brightness": 215,
+    "exclude": {
+      "pose": true,
+      "expression": true,
+      "small_face": false,
+      "blur": false,
+      "lighting": false
+    }
+  },
+  "spread_warning": 0.4,
+  "max_photos": 10,
+  "max_image_pixels": 16000000
+}

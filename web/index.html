@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PSL Scorer</title>
+  <meta name="description" content="On device face attractiveness score from a model trained on SCUT-FBP5500. No uploads.">
+  <meta name="theme-color" content="#0b0d12">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">
+        <h1>PSL Scorer</h1>
+        <span class="pill" title="All processing happens in your browser">on device</span>
+      </div>
+      <p class="sub">Face score from a model trained on 5,500 faces rated by 60 people each. Your photos never leave this device.</p>
+    </header>
+
+    <section id="loader" class="card loader" aria-live="polite">
+      <div class="loader-row"><span id="loaderText">Loading…</span><span id="loaderPct"></span></div>
+      <div class="bar"><div id="loaderBar"></div></div>
+      <p class="hint" id="loaderHint">First visit downloads about 45 MB. After that it works offline.</p>
+    </section>
+
+    <section class="card controls">
+      <div class="field">
+        <span class="label" id="genderLabel">Compare with</span>
+        <div class="seg" role="radiogroup" aria-labelledby="genderLabel">
+          <button type="button" role="radio" aria-checked="false" data-gender="male">Male</button>
+          <button type="button" role="radio" aria-checked="false" data-gender="female">Female</button>
+        </div>
+      </div>
+      <div class="buttons">
+        <label class="btn primary" id="pickBtn">
+          <input type="file" id="pick" accept="image/*" multiple class="vh">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z M4 15l4-4 4 4 3-3 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          Choose photos
+        </label>
+        <label class="btn" id="cameraBtn">
+          <input type="file" id="camera" accept="image/*" capture="environment" class="vh">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          Take photo
+        </label>
+      </div>
+      <div class="row">
+        <label class="switch">
+          <input type="checkbox" id="includeFlagged">
+          <span class="track" aria-hidden="true"></span>
+          Include flagged photos
+        </label>
+        <button type="button" id="clear" class="link" hidden>Clear all</button>
+      </div>
+      <p class="hint">1 to 10 photos. Several standard shots give a steadier score.</p>
+    </section>
+
+    <section id="result" class="card result" hidden aria-live="polite">
+      <div class="result-main">
+        <div class="big">
+          <span class="big-label">PSL</span>
+          <span class="big-value" id="rPsl">…</span>
+          <span class="big-scale">/ 8</span>
+        </div>
+        <div class="stats">
+          <div><span class="k">1 to 10</span><span class="v" id="rTen">…</span></div>
+          <div><span class="k">Raw (1 to 5)</span><span class="v" id="rRaw">…</span></div>
+          <div><span class="k">Percentile</span><span class="v" id="rPct">…</span></div>
+        </div>
+      </div>
+      <p class="meta" id="rMeta"></p>
+      <p class="warn-box" id="rDisagree" hidden>Photos disagree, add more or use a more standard shot.</p>
+      <p class="warn-box" id="rNoGender" hidden>Pick Male or Female above to see PSL, 1 to 10 and percentile.</p>
+      <p class="warn-box" id="rNone" hidden>No photo passed the checks. Turn on “Include flagged photos” or add a more standard shot.</p>
+    </section>
+
+    <section id="photos" class="photos" aria-live="polite"></section>
+
+    <details class="card panel">
+      <summary>How to take a scoreable photo</summary>
+      <ul class="tips">
+        <li><b>Back camera</b>, not the selfie camera.</li>
+        <li><b>Arm's length or further.</b> Close ups distort the face (bigger nose, narrower face).</li>
+        <li><b>Face straight on</b>, camera at eye level, head not turned or tilted.</li>
+        <li><b>Neutral face</b>: mouth closed, no smile.</li>
+        <li><b>Even front light</b>, for example facing a window. No harsh shadows.</li>
+        <li><b>No hat</b>, no sunglasses, <b>hair off the face</b>.</li>
+      </ul>
+    </details>
+
+    <details class="card panel">
+      <summary>What this measures</summary>
+      <div class="prose">
+        <p>It predicts the <b>average rating the SCUT-FBP5500 raters would give this photo</b> (60 raters per face, scale 1 to 5). The model is a ResNet18 checked against held out human ratings: <span id="accLine">Pearson correlation around 0.9 on 2,200 test faces</span>.</p>
+        <p>It is <b>not an objective truth</b>. It reflects the taste of that rater group, and the training faces are mostly young Asian and Caucasian adults. Different photos of the same face can score differently because of light, lens distance, angle and expression.</p>
+        <p><b>PSL</b> and <b>1 to 10</b> are simple rescalings of how far the raw score sits from the average SCUT face of the selected gender (PSL = 4 + z, 1 to 10 = 5 + 1.5 z). The percentile compares against the SCUT training faces of that gender.</p>
+        <p>Your photos are processed in this browser. Nothing is uploaded; there is no server.</p>
+      </div>
+    </details>
+
+    <footer class="foot">
+      <p>Same photo, same score: results are cached on this device by the photo's SHA-256.</p>
+    </footer>
+  </main>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
