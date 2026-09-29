@@ -62,8 +62,9 @@ export async function decode(blob, maxPixels = 16e6) {
   let f = 1;
   if (w * h > maxPixels) f = Math.sqrt(maxPixels / (w * h));
   const cw = Math.max(1, Math.round(w * f)), ch = Math.max(1, Math.round(h * f));
-  const canvas = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(cw, ch) : Object.assign(document.createElement('canvas'), { width: cw, height: ch });
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  let ctx = null;
+  try { if (typeof OffscreenCanvas !== 'undefined') ctx = new OffscreenCanvas(cw, ch).getContext('2d', { willReadFrequently: true }); } catch { ctx = null; }
+  if (!ctx) ctx = Object.assign(document.createElement('canvas'), { width: cw, height: ch }).getContext('2d', { willReadFrequently: true });
   if (f !== 1) { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; }
   ctx.drawImage(src, 0, 0, cw, ch);
   if (src.close) src.close();
@@ -166,7 +167,7 @@ export class Scorer {
     return {
       hash, status: 'ok', raw, crop, flags,
       excluded: flags.some((f) => f.exclude),
-      metrics: { pose, smile, jaw, eyeDist, sharpness, brightness, scale: T.s, width: image.width, height: image.height },
+      metrics: { pose, smile, jaw, eyeDist, sharpness, brightness, scale: T.s, width: image.width, height: image.height, eyes: [l, r] },
     };
   }
 }

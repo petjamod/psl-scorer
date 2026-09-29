@@ -27,14 +27,21 @@ export function convert(raw, gender, stats, config) {
   return { raw, z, psl, ten, percentile: percentile(raw, g.percentiles) };
 }
 
-// photos: [{ raw, excluded }] (only successfully scored photos)
+// photos: [{ raw, excluded, hash }] (only successfully scored photos).
+// The same file added twice (same SHA-256) is counted once.
 export function aggregate(photos, includeFlagged, config) {
-  const used = photos.filter((p) => includeFlagged || !p.excluded);
+  const seen = new Set();
+  const unique = photos.filter((p) => {
+    if (p.hash && seen.has(p.hash)) return false;
+    if (p.hash) seen.add(p.hash);
+    return true;
+  });
+  const used = unique.filter((p) => includeFlagged || !p.excluded);
   if (!used.length) return null;
   const raws = used.map((p) => p.raw);
   const mean = raws.reduce((a, b) => a + b, 0) / raws.length;
   const spread = Math.max(...raws) - Math.min(...raws);
-  return { raw: mean, n: used.length, spread, disagree: used.length > 1 && spread > config.spread_warning };
+  return { raw: mean, n: used.length, flaggedOut: unique.length - used.length, duplicates: photos.length - unique.length, spread, disagree: used.length > 1 && spread > config.spread_warning };
 }
 
 export function ordinal(n) {

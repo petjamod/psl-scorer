@@ -55,6 +55,7 @@ function cacheGet(hash) {
 function cachePut(hash, raw) { store.set(cacheKey(hash), JSON.stringify({ raw, t: Date.now() })); }
 
 // ---- input ----
+let queue = Promise.resolve();
 async function addFiles(fileList) {
   const files = [...fileList].filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif|avif|gif|bmp)$/i.test(f.name));
   const room = scorer.config ? scorer.config.max_photos - state.photos.length : 10 - state.photos.length;
@@ -65,12 +66,17 @@ async function addFiles(fileList) {
     return p;
   });
   render();
-  await ready;
+  // One photo at a time, across selections, so the model never runs concurrently.
   for (const p of todo) {
-    p.status = 'working'; render();
-    await processOne(p);
-    render();
+    queue = queue.then(async () => {
+      await ready;
+      if (!state.photos.includes(p)) return; // cleared meanwhile
+      p.status = 'working'; render();
+      await processOne(p);
+      render();
+    }).catch((e) => console.error(e));
   }
+  await queue;
 }
 
 async function processOne(p) {
@@ -207,11 +213,11 @@ function renderResult() {
   } else {
     for (const id of ['rPsl', 'rTen', 'rPct']) $(id).textContent = '…';
   }
-  const skipped = scored.length - agg.n;
   const g = state.gender ? ` · vs SCUT ${state.gender === 'male' ? 'men' : 'women'}` : '';
   $('rMeta').textContent = `Averaged over ${agg.n} photo${agg.n > 1 ? 's' : ''}` +
     (agg.n > 1 ? ` · spread ${agg.spread.toFixed(2)}` : '') +
-    (skipped ? ` · ${skipped} flagged not averaged` : '') + g;
+    (agg.flaggedOut ? ` · ${agg.flaggedOut} flagged not averaged` : '') +
+    (agg.duplicates ? ` · ${agg.duplicates} duplicate${agg.duplicates > 1 ? 's' : ''} ignored` : '') + g;
 }
 
 // ---- wiring ----

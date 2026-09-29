@@ -64,9 +64,9 @@ h1 { font-size: 26px; line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
 .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .btn {
   position: relative; display: flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 50px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line);
+  min-height: 50px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line);
   background: var(--card-2); color: var(--text); font-weight: 600; font-size: 15px; cursor: pointer;
-  user-select: none; -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-tap-highlight-color: transparent; white-space: nowrap;
 }
 .btn svg { width: 20px; height: 20px; flex: none; }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
@@ -122,7 +122,7 @@ h1 { font-size: 26px; line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
 .flag.ex { background: rgba(255, 138, 128, .12); color: var(--bad); }
 .flag.ok { background: rgba(94, 227, 161, .1); color: var(--good); }
 .photo.excluded { opacity: .5; }
-.photo.excluded .score { text-decoration: line-through; text-decoration-thickness: 2px; }
+.photo.excluded:not(.failed) .score { text-decoration: line-through; text-decoration-thickness: 2px; }
 .photo.failed .score { font-size: 16px; color: var(--bad); }
 .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite; display: inline-block; vertical-align: -3px; margin-right: 6px; }
 @keyframes spin { to { transform: rotate(360deg); } }

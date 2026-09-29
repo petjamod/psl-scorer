@@ -1,15 +1,27 @@
 {
   "model": {
-    "id": "hciilab-resnet18-256crop-v1",
+    "id": "scut-r18-ft-aligned-flipavg-v1",
     "file": "models/scut_resnet18.onnx",
-    "bytes": 44698603,
+    "bytes": 44710709,
     "preprocess": "256crop",
-    "test_pearson": 0.910
+    "test_pearson": 0.921
   },
   "conversions": {
     "note": "z = (raw - mean) / std, using the TRAIN label mean and std of the selected gender from stats.json",
-    "psl": { "base": 4, "per_z": 1.0, "min": 1, "max": 8, "decimals": 1 },
-    "ten": { "base": 5, "per_z": 1.5, "min": 1, "max": 10, "decimals": 1 },
+    "psl": {
+      "base": 4,
+      "per_z": 1.0,
+      "min": 1,
+      "max": 8,
+      "decimals": 1
+    },
+    "ten": {
+      "base": 5,
+      "per_z": 1.5,
+      "min": 1,
+      "max": 10,
+      "decimals": 1
+    },
     "raw_decimals": 2
   },
   "quality": {
